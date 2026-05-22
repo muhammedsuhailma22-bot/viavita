@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "640305095434",
+    "project_id": "via-vita",
+    "storage_bucket": "via-vita.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:640305095434:android:848fa1fba918958e1950f3",
+        "android_client_info": {
+          "package_name": "com.example.pawfect_match"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB4gvXx6AIzs6f7FHmS5VEB5pUcsOsRpA0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

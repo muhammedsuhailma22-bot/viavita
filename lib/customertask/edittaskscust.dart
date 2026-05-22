@@ -1,0 +1,352 @@
+import 'package:flutter/material.dart';
+
+class Addtaskcus extends StatefulWidget {
+  const Addtaskcus({super.key});
+
+  @override
+  State<Addtaskcus> createState() => _AddtaskcusState();
+}
+
+class _AddtaskcusState extends State<Addtaskcus> {
+  final _formKey = GlobalKey<FormState>();
+
+  final descriptionController = TextEditingController();
+  final locationController = TextEditingController();
+  final budgetController = TextEditingController();
+  final dateController = TextEditingController();
+
+  String? selectedCategory;
+
+  final List<String> job = [
+    'Plumbing',
+    'Painting',
+    'Welding',
+    'Electrician',
+    'Cleaning',
+  ];
+
+  @override
+  void dispose() {
+    descriptionController.dispose();
+    locationController.dispose();
+    budgetController.dispose();
+    dateController.dispose();
+    super.dispose();
+  }
+
+  Future<void> selectDate() async {
+    DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2100),
+    );
+
+    if (pickedDate != null) {
+      setState(() {
+        dateController.text =
+            "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
+      });
+    }
+  }
+
+  void submitForm() {
+    FocusScope.of(context).unfocus();
+
+    if (_formKey.currentState!.validate()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Task Updated Successfully"),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+
+      Future.delayed(const Duration(milliseconds: 800), () {
+        Navigator.pop(context);
+      });
+    }
+  }
+
+  InputDecoration inputDecoration({
+    required String hint,
+    Widget? suffixIcon,
+    String? prefixText,
+  }) {
+    return InputDecoration(
+      hintText: hint,
+      prefixText: prefixText,
+      suffixIcon: suffixIcon,
+
+      hintStyle: const TextStyle(
+        fontSize: 16,
+        color: Color.fromRGBO(105, 113, 129, 1),
+      ),
+
+      filled: true,
+      fillColor: Colors.grey.shade100,
+
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
+      ),
+
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFEA5A1D), width: 1),
+      ),
+    );
+  }
+
+  Widget sectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 13),
+
+      child: Text(
+        title,
+
+        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context).unfocus();
+      },
+
+      child: Scaffold(
+        backgroundColor: Colors.white,
+
+        appBar: AppBar(
+          elevation: 0,
+          backgroundColor: Colors.white,
+
+          title: const Text(
+            "Edit Tasks",
+
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w500,
+              color: Colors.black,
+            ),
+          ),
+
+          leading: IconButton(
+            icon: const Icon(
+              Icons.arrow_back_ios_new_outlined,
+              color: Colors.black,
+            ),
+
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+        ),
+
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.only(bottom: 30),
+
+            child: Form(
+              key: _formKey,
+
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+
+                children: [
+                  const SizedBox(height: 32),
+
+                  sectionTitle("Job Categories"),
+
+                  const SizedBox(height: 5),
+
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+
+                    child: DropdownButtonFormField<String>(
+                      value: selectedCategory,
+
+                      hint: const Text('Job Categories'),
+
+                      decoration: inputDecoration(hint: ""),
+
+                      validator: (value) {
+                        if (value == null) {
+                          return "Please select category";
+                        }
+                        return null;
+                      },
+
+                      items: job.map((item) {
+                        return DropdownMenuItem<String>(
+                          value: item,
+                          child: Text(item),
+                        );
+                      }).toList(),
+
+                      onChanged: (value) {
+                        setState(() {
+                          selectedCategory = value;
+                        });
+                      },
+                    ),
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  sectionTitle("Description"),
+
+                  const SizedBox(height: 5),
+
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+
+                    child: TextFormField(
+                      controller: descriptionController,
+
+                      maxLines: 4,
+
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Please enter description";
+                        }
+                        return null;
+                      },
+
+                      decoration: inputDecoration(hint: "Description"),
+                    ),
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  sectionTitle("Location"),
+
+                  const SizedBox(height: 5),
+
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+
+                    child: TextFormField(
+                      controller: locationController,
+
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Please enter location";
+                        }
+                        return null;
+                      },
+
+                      decoration: inputDecoration(hint: "Location"),
+                    ),
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  sectionTitle("Estimated Budget"),
+
+                  const SizedBox(height: 5),
+
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+
+                    child: TextFormField(
+                      controller: budgetController,
+
+                      keyboardType: TextInputType.number,
+
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Please enter budget";
+                        }
+                        return null;
+                      },
+
+                      decoration: inputDecoration(
+                        hint: "0/-",
+                        prefixText: "₹ ",
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  sectionTitle("Expected days for completion"),
+
+                  const SizedBox(height: 5),
+
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+
+                    child: TextFormField(
+                      controller: dateController,
+
+                      readOnly: true,
+
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Please select date";
+                        }
+                        return null;
+                      },
+
+                      onTap: selectDate,
+
+                      decoration: inputDecoration(
+                        hint: "DD/MM/YYYY",
+
+                        suffixIcon: const Icon(Icons.calendar_today_outlined),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 50),
+
+                  Center(
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(10),
+
+                      onTap: submitForm,
+
+                      child: Container(
+                        height: 55,
+                        width: screenWidth * 0.95,
+
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF992015), Color(0xFFEA5A1D)],
+                          ),
+                        ),
+
+                        child: const Center(
+                          child: Text(
+                            "Confirm",
+
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 30),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

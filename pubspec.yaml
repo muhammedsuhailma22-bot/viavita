@@ -1,0 +1,84 @@
+name: pawfect_match
+description: "A new Flutter project."
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.5
+
+dependencies:
+  flutter:
+   sdk: flutter
+  provider: ^6.1.2
+  firebase_core: ^4.9.0
+  # firebase_auth: ^latest
+  # cloud_firestore: ^latest
+  # firebase_storage: ^latest
+
+  # iOS style icons
+  cupertino_icons: ^1.0.8
+
+  # For SVG images (optional if you use SVG)
+  flutter_svg: ^2.0.10
+
+  # Image picker (gallery & camera)
+  image_picker: ^1.0.7
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.13.1
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/logo.png"
+  
+flutter:
+
+  # Enables Material icons
+  uses-material-design: true
+
+  # ------------------ ASSETS ------------------
+  assets:
+    - assets/images/
+
+  # ------------------ FONTS ------------------
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Light.ttf
+        - asset: assets/fonts/Poppins-Medium.ttf
+
+# ----------------------------------------------------------
+# NOTES (keep for reference)
+# ----------------------------------------------------------
+
+# version:
+# 1.0.0 → version name
+# +1 → build number
+
+# To update dependencies:
+# flutter pub upgrade
+
+# To check outdated packages:
+# flutter pub outdated
+
+# Asset rules:
+# - Folder must exist
+# - Images inside assets/images/
+# - Run flutter pub get after adding
+
+# Font rules:
+# - Font files must be inside assets/fonts/
+# - Use fontFamily: "Poppins" in TextStyle
+
+# Example:
+# Text(
+#   "Hello",
+#   style: TextStyle(fontFamily: "Poppins"),
+# )
