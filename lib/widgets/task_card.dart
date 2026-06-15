@@ -13,6 +13,7 @@ class TaskCard extends StatelessWidget {
   final String estimate;
   final String profileImage;
   final String customerName;
+  final String id;
 
   const TaskCard({
     super.key,
@@ -27,6 +28,7 @@ class TaskCard extends StatelessWidget {
     required this.estimate,
     required this.profileImage,
     required this.customerName,
+    required this.id,
   });
 
   @override
@@ -39,6 +41,7 @@ class TaskCard extends StatelessWidget {
           context,
           MaterialPageRoute(
             builder: (context) => Tasksetailed(
+              id: id,
               title: title,
               description: description,
               price: price,
@@ -56,8 +59,6 @@ class TaskCard extends StatelessWidget {
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 14),
-        height: 129,
-        width: 390,
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
 
         decoration: BoxDecoration(

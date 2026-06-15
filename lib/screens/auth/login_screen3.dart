@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pawfect_match/models/loginmodel.dart';
 import 'package:pawfect_match/providers/loginprovider.dart';
-import 'package:pawfect_match/screens/customerscreens/customer_home.dart';
+import 'package:pawfect_match/screens/customerscreens/customer_main_screen.dart';
 import 'package:pawfect_match/screens/forgot_password_screen.dart';
 import 'package:pawfect_match/screens/signupselecter4.dart';
 
@@ -59,7 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
             pageBuilder: (_, animation, __) {
               return FadeTransition(
                 opacity: animation,
-                child: const CustomerHome(),
+                child: const CustomerMainScreen(),
               );
             },
           ),

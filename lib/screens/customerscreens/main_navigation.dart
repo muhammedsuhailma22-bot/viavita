@@ -16,40 +16,61 @@ class MainNavigationScreen extends StatefulWidget {
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int selectedIndex = 0;
 
-  final List<Widget> pages = const [
+  final FocusNode searchFocus = FocusNode();
+
+  late final List<Widget> pages = [
     CustomerHome(),
-    Tasks(),
-    Bookings(),
-    EditProfile(),
+    const Tasks(),
+    const Bookings(),
+    const EditProfile(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+
+    searchFocus.addListener(() {
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    searchFocus.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: IndexedStack(index: selectedIndex, children: pages),
 
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFFEA5A1D),
-        onPressed: () {
-          Navigator.push(
-            context,
-            PageRouteBuilder(
-              transitionDuration: const Duration(milliseconds: 300),
+      floatingActionButton: searchFocus.hasFocus
+          ? null
+          : FloatingActionButton(
+              backgroundColor: const Color(0xFFEA5A1D),
 
-              pageBuilder: (_, animation, __) {
-                return FadeTransition(
-                  opacity: animation,
-                  child: const Addtasks(),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  PageRouteBuilder(
+                    transitionDuration: const Duration(milliseconds: 300),
+
+                    pageBuilder: (_, animation, __) {
+                      return FadeTransition(
+                        opacity: animation,
+                        child: const Addtasks(),
+                      );
+                    },
+                  ),
                 );
               },
-            ),
-          );
-        },
-        child: const Icon(Icons.add),
-      ),
 
+              child: const Icon(Icons.add, color: Colors.white),
+            ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
 
       bottomNavigationBar: Container(

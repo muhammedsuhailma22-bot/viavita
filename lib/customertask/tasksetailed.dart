@@ -3,10 +3,15 @@ import 'package:flutter_svg/svg.dart';
 import 'package:pawfect_match/customertask/addtasks.dart';
 import 'package:pawfect_match/customertask/edittaskscust.dart';
 import 'package:pawfect_match/booking/custboookings.dart';
+import 'package:pawfect_match/providers/reviewprovider.dart';
 import 'package:pawfect_match/screens/customerscreens/customer_home.dart';
 import 'package:pawfect_match/screens/customerscreens/custprofile.dart';
+import 'package:pawfect_match/screens/customerscreens/main_navigation.dart';
+import 'package:pawfect_match/widgets/shimmer_helpers.dart';
+import 'package:provider/provider.dart';
 
 class Tasksetailed extends StatefulWidget {
+  final String id;
   final String title;
   final String description;
   final String price;
@@ -22,6 +27,7 @@ class Tasksetailed extends StatefulWidget {
   const Tasksetailed({
     super.key,
     required this.title,
+    required this.id,
     required this.description,
     required this.price,
     required this.location,
@@ -42,6 +48,29 @@ class _TasksetailedState extends State<Tasksetailed> {
   int selectedIndex = 1;
 
   double rating = 0;
+
+  final reviewController = TextEditingController();
+
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(const Duration(milliseconds: 1200), () {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    reviewController.dispose();
+
+    super.dispose();
+  }
 
   void navigateToScreen(Widget screen) {
     Navigator.push(
@@ -67,6 +96,102 @@ class _TasksetailedState extends State<Tasksetailed> {
         pageBuilder: (_, animation, __) {
           return FadeTransition(opacity: animation, child: screen);
         },
+      ),
+    );
+  }
+
+  Widget _buildShimmerBody() {
+    return SingleChildScrollView(
+      physics: const NeverScrollableScrollPhysics(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 24),
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: const [
+                ShimmerTextLine(width: 180, height: 24),
+                ShimmerBlock(width: 89, height: 24, borderRadius: 4),
+              ],
+            ),
+          ),
+          const SizedBox(height: 32),
+          // Budget
+          Padding(
+            padding: const EdgeInsets.only(left: 14),
+            child: Row(
+              children: const [
+                ShimmerCircle(radius: 12),
+                SizedBox(width: 9),
+                ShimmerTextLine(width: 60, height: 13),
+                SizedBox(width: 5),
+                ShimmerTextLine(width: 100, height: 23),
+              ],
+            ),
+          ),
+          const SizedBox(height: 32),
+          // Location
+          Padding(
+            padding: const EdgeInsets.only(left: 14),
+            child: Row(
+              children: const [
+                ShimmerCircle(radius: 12),
+                SizedBox(width: 9),
+                ShimmerTextLine(width: 70, height: 14),
+                SizedBox(width: 5),
+                ShimmerTextLine(width: 120, height: 14),
+              ],
+            ),
+          ),
+          const SizedBox(height: 32),
+          // Expected Deadline
+          Padding(
+            padding: const EdgeInsets.only(left: 14),
+            child: Row(
+              children: const [
+                ShimmerCircle(radius: 12),
+                SizedBox(width: 9),
+                ShimmerTextLine(width: 130, height: 14),
+                SizedBox(width: 5),
+                ShimmerTextLine(width: 110, height: 14),
+              ],
+            ),
+          ),
+          const SizedBox(height: 32),
+          // Description Header
+          const Padding(
+            padding: EdgeInsets.all(14),
+            child: ShimmerTextLine(width: 100, height: 16),
+          ),
+          // Description Body
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const [
+                ShimmerTextLine(width: double.infinity),
+                ShimmerTextLine(width: double.infinity),
+                ShimmerTextLine(width: double.infinity),
+                ShimmerTextLine(width: 200),
+              ],
+            ),
+          ),
+          const SizedBox(height: 40),
+          // Edit button placeholder
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              child: ShimmerBlock(
+                width: double.infinity,
+                height: 50,
+                borderRadius: 10,
+              ),
+            ),
+          ),
+          const SizedBox(height: 100),
+        ],
       ),
     );
   }
@@ -104,624 +229,710 @@ class _TasksetailedState extends State<Tasksetailed> {
         ),
 
         body: SafeArea(
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-
-              children: [
-                const SizedBox(height: 24),
-
-                Padding(
-                  padding: const EdgeInsets.all(10),
-
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
+          child: _isLoading
+              ? _buildShimmerBody()
+              : SingleChildScrollView(
+                  physics:
+                      const ClampingScrollPhysics(), // Disables stretch distortion on overscroll
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        widget.title,
+                      const SizedBox(height: 24),
 
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w500,
+                      Padding(
+                        padding: const EdgeInsets.all(10),
 
-                          color: Color.fromRGBO(69, 83, 96, 1),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+                          children: [
+                            Text(
+                              widget.title,
+
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w500,
+
+                                color: Color.fromRGBO(69, 83, 96, 1),
+                              ),
+                            ),
+
+                            Image.asset(
+                              widget.statusImage,
+                              height: 24,
+                              width: 89,
+                            ),
+                          ],
                         ),
                       ),
 
-                      Image.asset(widget.statusImage, height: 24, width: 89),
-                    ],
-                  ),
-                ),
+                      const SizedBox(height: 32),
 
-                const SizedBox(height: 32),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 14),
 
-                Padding(
-                  padding: const EdgeInsets.only(left: 14),
+                        child: Row(
+                          children: [
+                            Image.asset('assets/images/wallet.png', scale: .8),
 
-                  child: Row(
-                    children: [
-                      Image.asset('assets/images/wallet.png', scale: .8),
+                            const SizedBox(width: 9),
 
-                      const SizedBox(width: 9),
+                            const Text(
+                              "Budget - ",
 
-                      const Text(
-                        "Budget - ",
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
 
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
+                                color: Color.fromRGBO(123, 131, 137, 1),
+                              ),
+                            ),
 
-                          color: Color.fromRGBO(123, 131, 137, 1),
+                            Text(
+                              widget.price,
+
+                              style: const TextStyle(
+                                fontSize: 23,
+                                fontWeight: FontWeight.w600,
+
+                                color: Color.fromRGBO(123, 131, 137, 1),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
 
-                      Text(
-                        widget.price,
+                      const SizedBox(height: 32),
 
-                        style: const TextStyle(
-                          fontSize: 23,
-                          fontWeight: FontWeight.w600,
+                      Padding(
+                        padding: const EdgeInsets.only(left: 14),
 
-                          color: Color.fromRGBO(123, 131, 137, 1),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                        child: Row(
+                          children: [
+                            Image.asset('assets/images/loc.png', scale: .8),
 
-                const SizedBox(height: 32),
+                            const SizedBox(width: 9),
 
-                Padding(
-                  padding: const EdgeInsets.only(left: 14),
+                            const Text(
+                              "Location - ",
 
-                  child: Row(
-                    children: [
-                      Image.asset('assets/images/loc.png', scale: .8),
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
 
-                      const SizedBox(width: 9),
+                                color: Color.fromRGBO(123, 131, 137, 1),
+                              ),
+                            ),
 
-                      const Text(
-                        "Location - ",
+                            Text(
+                              widget.location,
 
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
 
-                          color: Color.fromRGBO(123, 131, 137, 1),
-                        ),
-                      ),
-
-                      Text(
-                        widget.location,
-
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-
-                          color: Color.fromRGBO(123, 131, 137, 1),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 32),
-
-                Padding(
-                  padding: const EdgeInsets.only(left: 14),
-
-                  child: Row(
-                    children: [
-                      Image.asset('assets/images/calender.png', scale: .8),
-
-                      const SizedBox(width: 9),
-
-                      const Text(
-                        "Expected Dead line - ",
-
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-
-                          color: Color.fromRGBO(123, 131, 137, 1),
+                                color: Color.fromRGBO(123, 131, 137, 1),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
 
-                      Text(
-                        widget.deadline,
+                      const SizedBox(height: 32),
 
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
+                      Padding(
+                        padding: const EdgeInsets.only(left: 14),
 
-                          color: Color.fromRGBO(123, 131, 137, 1),
+                        child: Row(
+                          children: [
+                            Image.asset(
+                              'assets/images/calender.png',
+                              scale: .8,
+                            ),
+
+                            const SizedBox(width: 9),
+
+                            const Text(
+                              "Expected Dead line - ",
+
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+
+                                color: Color.fromRGBO(123, 131, 137, 1),
+                              ),
+                            ),
+
+                            Text(
+                              widget.deadline,
+
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+
+                                color: Color.fromRGBO(123, 131, 137, 1),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
 
-                const SizedBox(height: 32),
+                      const SizedBox(height: 32),
 
-                const Padding(
-                  padding: EdgeInsets.all(14),
+                      const Padding(
+                        padding: EdgeInsets.all(14),
 
-                  child: Text(
-                    "Description",
+                        child: Text(
+                          "Description",
 
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                  ),
-                ),
-
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
-
-                  child: Text(
-                    widget.description,
-
-                    style: const TextStyle(
-                      fontSize: 14,
-                      height: 1.4,
-                      wordSpacing: 3,
-
-                      color: Color.fromRGBO(105, 113, 129, 1),
-                    ),
-                  ),
-                ),
-                if (widget.status == "In Progress") ...[
-                  const SizedBox(height: 18),
-
-                  const Padding(
-                    padding: EdgeInsets.all(14),
-
-                    child: Text(
-                      "Requirements",
-
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
 
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
-
-                    child: Text(
-                      widget.requirements,
-
-                      style: const TextStyle(fontSize: 14, height: 1.4),
-                    ),
-                  ),
-                ],
-
-                if (widget.status == "Completed") ...[
-                  const SizedBox(height: 18),
-
-                  const Padding(
-                    padding: EdgeInsets.all(14),
-
-                    child: Text(
-                      "Estimate",
-
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
-
-                    child: Text(
-                      widget.estimate,
-
-                      style: const TextStyle(fontSize: 14, height: 1.4),
-                    ),
-                  ),
-
-                  const SizedBox(height: 37),
-
-                  Center(
-                    child: SizedBox(
-                      width: double.infinity,
-                      height: 55,
-
-                      child: Padding(
+                      Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 14),
 
-                        child: OutlinedButton(
-                          onPressed: () {
-                            showDialog(
-                              context: context,
+                        child: Text(
+                          widget.description,
 
-                              builder: (context) {
-                                return AlertDialog(
-                                  backgroundColor: Colors.white,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            height: 1.4,
+                            wordSpacing: 3,
 
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
+                            color: Color.fromRGBO(105, 113, 129, 1),
+                          ),
+                        ),
+                      ),
+                      if (widget.status == "In Progress") ...[
+                        const SizedBox(height: 18),
 
-                                  content: SingleChildScrollView(
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
+                        const Padding(
+                          padding: EdgeInsets.all(14),
 
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                          child: Text(
+                            "Requirements",
 
-                                      children: [
-                                        Container(
-                                          width: 372,
-                                          padding: const EdgeInsets.all(10),
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
 
-                                          decoration: BoxDecoration(
-                                            color: const Color.fromRGBO(
-                                              250,
-                                              246,
-                                              245,
-                                              1,
-                                            ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 14),
 
-                                            borderRadius: BorderRadius.circular(
-                                              10,
-                                            ),
+                          child: Text(
+                            widget.requirements,
+
+                            style: const TextStyle(fontSize: 14, height: 1.4),
+                          ),
+                        ),
+                      ],
+
+                      if (widget.status == "Completed") ...[
+                        const SizedBox(height: 18),
+
+                        const Padding(
+                          padding: EdgeInsets.all(14),
+
+                          child: Text(
+                            "Estimate",
+
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 14),
+
+                          child: Text(
+                            widget.estimate,
+
+                            style: const TextStyle(fontSize: 14, height: 1.4),
+                          ),
+                        ),
+
+                        const SizedBox(height: 37),
+
+                        Center(
+                          child: SizedBox(
+                            width: double.infinity,
+                            height: 55,
+
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                              ),
+
+                              child: OutlinedButton(
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+
+                                    builder: (context) {
+                                      return AlertDialog(
+                                        backgroundColor: Colors.white,
+
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
                                           ),
+                                        ),
 
-                                          child: Row(
+                                        content: SingleChildScrollView(
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+
                                             children: [
-                                              ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
-
-                                                child: Image.asset(
-                                                  widget.profileImage,
-
-                                                  height: 52,
-
-                                                  width: 52,
-
-                                                  fit: BoxFit.cover,
-
-                                                  errorBuilder:
-                                                      (
-                                                        context,
-                                                        error,
-                                                        stackTrace,
-                                                      ) {
-                                                        return Container(
-                                                          height: 52,
-
-                                                          width: 52,
-
-                                                          color: Colors
-                                                              .grey
-                                                              .shade300,
-
-                                                          child: const Icon(
-                                                            Icons.person,
-                                                          ),
-                                                        );
-                                                      },
+                                              Container(
+                                                width: 372,
+                                                padding: const EdgeInsets.all(
+                                                  10,
                                                 ),
-                                              ),
 
-                                              const SizedBox(width: 10),
+                                                decoration: BoxDecoration(
+                                                  color: const Color.fromRGBO(
+                                                    250,
+                                                    246,
+                                                    245,
+                                                    1,
+                                                  ),
 
-                                              Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
+                                                  borderRadius:
+                                                      BorderRadius.circular(10),
+                                                ),
 
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-
+                                                child: Row(
                                                   children: [
-                                                    Text(
-                                                      widget.customerName,
+                                                    ClipRRect(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            8,
+                                                          ),
 
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
+                                                      child: Image.asset(
+                                                        widget.profileImage,
 
-                                                      style: const TextStyle(
-                                                        fontSize: 15,
+                                                        height: 52,
 
-                                                        fontWeight:
-                                                            FontWeight.w600,
+                                                        width: 52,
+
+                                                        fit: BoxFit.cover,
+
+                                                        errorBuilder:
+                                                            (
+                                                              context,
+                                                              error,
+                                                              stackTrace,
+                                                            ) {
+                                                              return Container(
+                                                                height: 52,
+
+                                                                width: 52,
+
+                                                                color: Colors
+                                                                    .grey
+                                                                    .shade300,
+
+                                                                child: const Icon(
+                                                                  Icons.person,
+                                                                ),
+                                                              );
+                                                            },
                                                       ),
                                                     ),
 
-                                                    const SizedBox(height: 2),
+                                                    const SizedBox(width: 10),
 
-                                                    Text(
-                                                      widget.title,
+                                                    Expanded(
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
 
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
+                                                        mainAxisSize:
+                                                            MainAxisSize.min,
 
-                                                      style: const TextStyle(
-                                                        fontSize: 13,
+                                                        children: [
+                                                          Text(
+                                                            widget.customerName,
 
-                                                        color: Colors.grey,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+
+                                                            style:
+                                                                const TextStyle(
+                                                                  fontSize: 15,
+
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w600,
+                                                                ),
+                                                          ),
+
+                                                          const SizedBox(
+                                                            height: 2,
+                                                          ),
+
+                                                          Text(
+                                                            widget.title,
+
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+
+                                                            style:
+                                                                const TextStyle(
+                                                                  fontSize: 13,
+
+                                                                  color: Colors
+                                                                      .grey,
+                                                                ),
+                                                          ),
+                                                        ],
                                                       ),
                                                     ),
                                                   ],
                                                 ),
                                               ),
+
+                                              const SizedBox(height: 18),
+
+                                              StatefulBuilder(
+                                                builder: (context, setDialogState) {
+                                                  return Row(
+                                                    children: List.generate(5, (
+                                                      index,
+                                                    ) {
+                                                      IconData icon;
+
+                                                      if (index + 1 <= rating) {
+                                                        icon = Icons.star;
+                                                      } else if (index + 0.5 <=
+                                                          rating) {
+                                                        icon = Icons.star_half;
+                                                      } else {
+                                                        icon =
+                                                            Icons.star_border;
+                                                      }
+
+                                                      return InkWell(
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              20,
+                                                            ),
+
+                                                        onTap: () {
+                                                          setDialogState(() {
+                                                            rating =
+                                                                index + 1.0;
+                                                          });
+                                                        },
+
+                                                        child: Padding(
+                                                          padding:
+                                                              const EdgeInsets.only(
+                                                                right: 4,
+                                                              ),
+
+                                                          child: Icon(
+                                                            icon,
+
+                                                            color:
+                                                                Colors.orange,
+
+                                                            size: 30,
+                                                          ),
+                                                        ),
+                                                      );
+                                                    }),
+                                                  );
+                                                },
+                                              ),
+
+                                              const SizedBox(height: 14),
+
+                                              const Text(
+                                                "Review",
+
+                                                style: TextStyle(
+                                                  fontSize: 14,
+
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+
+                                              const SizedBox(height: 10),
+
+                                              TextField(
+                                                controller: reviewController,
+
+                                                maxLines: 4,
+
+                                                decoration: InputDecoration(
+                                                  hintText: "Write your review",
+
+                                                  filled: true,
+
+                                                  fillColor:
+                                                      const Color.fromRGBO(
+                                                        248,
+                                                        248,
+                                                        248,
+                                                        1,
+                                                      ),
+
+                                                  border: OutlineInputBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          10,
+                                                        ),
+
+                                                    borderSide: BorderSide.none,
+                                                  ),
+                                                ),
+                                              ),
+                                              const SizedBox(height: 14),
+
+                                              Row(
+                                                children: [
+                                                  Expanded(
+                                                    child: OutlinedButton(
+                                                      onPressed: () {
+                                                        Navigator.pop(context);
+                                                      },
+
+                                                      style: OutlinedButton.styleFrom(
+                                                        side: const BorderSide(
+                                                          color: Color(
+                                                            0xFFEA5A1D,
+                                                          ),
+                                                        ),
+
+                                                        shape: RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                8,
+                                                              ),
+                                                        ),
+                                                      ),
+
+                                                      child: const Text(
+                                                        "Cancel",
+
+                                                        style: TextStyle(
+                                                          color: Color(
+                                                            0xFF992015,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+
+                                                  const SizedBox(width: 12),
+
+                                                  Expanded(
+                                                    child: Container(
+                                                      height: 40,
+
+                                                      decoration: BoxDecoration(
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              8,
+                                                            ),
+
+                                                        gradient:
+                                                            const LinearGradient(
+                                                              colors: [
+                                                                Color(
+                                                                  0xFF992015,
+                                                                ),
+                                                                Color(
+                                                                  0xFFEA5A1D,
+                                                                ),
+                                                              ],
+                                                            ),
+                                                      ),
+
+                                                      child: ElevatedButton(
+                                                        onPressed: () async {
+                                                          final success =
+                                                              await Provider.of<
+                                                                    ReviewProvider
+                                                                  >(
+                                                                    context,
+                                                                    listen:
+                                                                        false,
+                                                                  )
+                                                                  .addReview(
+                                                                    taskId:
+                                                                        widget
+                                                                            .id,
+
+                                                                    rating: rating
+                                                                        .toString(),
+
+                                                                    review:
+                                                                        reviewController
+                                                                            .text,
+                                                                  );
+
+                                                          if (success) {
+                                                            Navigator.pop(
+                                                              context,
+                                                            );
+
+                                                            ScaffoldMessenger.of(
+                                                              context,
+                                                            ).showSnackBar(
+                                                              const SnackBar(
+                                                                content: Text(
+                                                                  "Review Added Successfully",
+                                                                ),
+                                                              ),
+                                                            );
+                                                          } else {
+                                                            ScaffoldMessenger.of(
+                                                              context,
+                                                            ).showSnackBar(
+                                                              const SnackBar(
+                                                                content: Text(
+                                                                  "Failed to add review",
+                                                                ),
+                                                              ),
+                                                            );
+                                                          }
+                                                        },
+
+                                                        style: ElevatedButton.styleFrom(
+                                                          backgroundColor:
+                                                              Colors
+                                                                  .transparent,
+
+                                                          shadowColor: Colors
+                                                              .transparent,
+
+                                                          shape: RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius.circular(
+                                                                  8,
+                                                                ),
+                                                          ),
+                                                        ),
+
+                                                        child: const Text(
+                                                          "Send",
+
+                                                          style: TextStyle(
+                                                            color: Colors.white,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
                                             ],
                                           ),
                                         ),
+                                      );
+                                    },
+                                  );
+                                },
 
-                                        const SizedBox(height: 18),
-
-                                        StatefulBuilder(
-                                          builder: (context, setDialogState) {
-                                            return Row(
-                                              children: List.generate(5, (
-                                                index,
-                                              ) {
-                                                IconData icon;
-
-                                                if (index + 1 <= rating) {
-                                                  icon = Icons.star;
-                                                } else if (index + 0.5 <=
-                                                    rating) {
-                                                  icon = Icons.star_half;
-                                                } else {
-                                                  icon = Icons.star_border;
-                                                }
-
-                                                return InkWell(
-                                                  borderRadius:
-                                                      BorderRadius.circular(20),
-
-                                                  onTap: () {
-                                                    setDialogState(() {
-                                                      rating = index + 1.0;
-                                                    });
-                                                  },
-
-                                                  child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                          right: 4,
-                                                        ),
-
-                                                    child: Icon(
-                                                      icon,
-
-                                                      color: Colors.orange,
-
-                                                      size: 30,
-                                                    ),
-                                                  ),
-                                                );
-                                              }),
-                                            );
-                                          },
-                                        ),
-
-                                        const SizedBox(height: 14),
-
-                                        const Text(
-                                          "Review",
-
-                                          style: TextStyle(
-                                            fontSize: 14,
-
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-
-                                        const SizedBox(height: 10),
-
-                                        TextField(
-                                          maxLines: 4,
-
-                                          decoration: InputDecoration(
-                                            hintText: "Write your review",
-
-                                            filled: true,
-
-                                            fillColor: const Color.fromRGBO(
-                                              248,
-                                              248,
-                                              248,
-                                              1,
-                                            ),
-
-                                            border: OutlineInputBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
-
-                                              borderSide: BorderSide.none,
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(height: 14),
-
-                                        Row(
-                                          children: [
-                                            Expanded(
-                                              child: OutlinedButton(
-                                                onPressed: () {
-                                                  Navigator.pop(context);
-                                                },
-
-                                                style: OutlinedButton.styleFrom(
-                                                  side: const BorderSide(
-                                                    color: Color(0xFFEA5A1D),
-                                                  ),
-
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          8,
-                                                        ),
-                                                  ),
-                                                ),
-
-                                                child: const Text(
-                                                  "Cancel",
-
-                                                  style: TextStyle(
-                                                    color: Color(0xFF992015),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-
-                                            const SizedBox(width: 12),
-
-                                            Expanded(
-                                              child: Container(
-                                                height: 40,
-
-                                                decoration: BoxDecoration(
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-
-                                                  gradient:
-                                                      const LinearGradient(
-                                                        colors: [
-                                                          Color(0xFF992015),
-                                                          Color(0xFFEA5A1D),
-                                                        ],
-                                                      ),
-                                                ),
-
-                                                child: ElevatedButton(
-                                                  onPressed: () {
-                                                    Navigator.pop(context);
-
-                                                    ScaffoldMessenger.of(
-                                                      context,
-                                                    ).showSnackBar(
-                                                      const SnackBar(
-                                                        content: Text(
-                                                          "Review Added Successfully",
-                                                        ),
-
-                                                        behavior:
-                                                            SnackBarBehavior
-                                                                .floating,
-                                                      ),
-                                                    );
-                                                  },
-
-                                                  style: ElevatedButton.styleFrom(
-                                                    backgroundColor:
-                                                        Colors.transparent,
-
-                                                    shadowColor:
-                                                        Colors.transparent,
-
-                                                    shape: RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                            8,
-                                                          ),
-                                                    ),
-                                                  ),
-
-                                                  child: const Text(
-                                                    "Send",
-
-                                                    style: TextStyle(
-                                                      color: Colors.white,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
+                                style: OutlinedButton.styleFrom(
+                                  side: const BorderSide(
+                                    color: Color.fromRGBO(153, 32, 21, 1),
                                   ),
-                                );
-                              },
-                            );
-                          },
 
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(
-                              color: Color.fromRGBO(153, 32, 21, 1),
-                            ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
 
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
+                                child: const Text(
+                                  "Add Review",
 
-                          child: const Text(
-                            "Add Review",
+                                  style: TextStyle(
+                                    color: Color.fromRGBO(153, 32, 21, 1),
 
-                            style: TextStyle(
-                              color: Color.fromRGBO(153, 32, 21, 1),
+                                    fontSize: 18,
 
-                              fontSize: 18,
-
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-
-                const SizedBox(height: 40),
-
-                if (widget.status == "Pending")
-                  Center(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 14),
-
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(10),
-
-                        onTap: () {
-                          navigateToScreen(const Addtaskcus());
-                        },
-
-                        child: Container(
-                          width: double.infinity,
-
-                          padding: const EdgeInsets.symmetric(vertical: 15),
-
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFF992015), Color(0xFFEA5A1D)],
-                            ),
-                          ),
-
-                          child: const Center(
-                            child: Text(
-                              "Edit",
-
-                              style: TextStyle(
-                                color: Colors.white,
-
-                                fontSize: 18,
-
-                                fontWeight: FontWeight.w500,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    ),
-                  ),
+                      ],
 
-                const SizedBox(height: 100),
-              ],
-            ),
-          ),
+                      const SizedBox(height: 40),
+
+                      if (widget.status == "Pending")
+                        Center(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 14),
+
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(10),
+
+                              onTap: () {
+                                navigateToScreen(Addtaskcus(taskId: widget.id));
+                              },
+
+                              child: Container(
+                                width: double.infinity,
+
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 15,
+                                ),
+
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+
+                                  gradient: const LinearGradient(
+                                    colors: [
+                                      Color(0xFF992015),
+                                      Color(0xFFEA5A1D),
+                                    ],
+                                  ),
+                                ),
+
+                                child: const Center(
+                                  child: Text(
+                                    "Edit",
+
+                                    style: TextStyle(
+                                      color: Colors.white,
+
+                                      fontSize: 18,
+
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+
+                      const SizedBox(height: 100),
+                    ],
+                  ),
+                ),
         ),
         floatingActionButton: Padding(
           padding: const EdgeInsets.only(top: 10),
@@ -816,7 +1027,7 @@ class _TasksetailedState extends State<Tasksetailed> {
                       index: 0,
 
                       onTap: () {
-                        replaceScreen(const CustomerHome());
+                        replaceScreen(const MainNavigationScreen());
                       },
                     ),
 

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:pawfect_match/models/resetpasmodel.dart';
+import 'package:pawfect_match/providers/resetpassprovider.dart';
 import 'package:pawfect_match/screens/auth/resetpassscreen.dart';
+import 'package:provider/provider.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -19,24 +22,29 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     super.dispose();
   }
 
-  void navigateToReset() {
+  Future<void> forgotPassword() async {
     FocusScope.of(context).unfocus();
 
     if (_formKey.currentState!.validate()) {
-      Navigator.push(
-        context,
+      final user = ForgotModel(email: emailController.text.trim());
 
-        PageRouteBuilder(
-          transitionDuration: const Duration(milliseconds: 300),
+      final provider = Provider.of<ForgotProvider>(context, listen: false);
 
-          pageBuilder: (_, animation, __) {
-            return FadeTransition(
-              opacity: animation,
-              child: const ResetPasswordScreen(),
-            );
-          },
-        ),
-      );
+      final success = await provider.sendResetLink(user);
+
+      if (!mounted) return;
+
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Reset link sent successfully")),
+        );
+
+        Navigator.pop(context);
+      } else {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Email not found")));
+      }
     }
   }
 
@@ -146,8 +154,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         child: InkWell(
                           borderRadius: BorderRadius.circular(12),
 
-                          onTap: navigateToReset,
-
+                          onTap: forgotPassword,
                           child: Container(
                             padding: const EdgeInsets.symmetric(vertical: 15),
 

@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:pawfect_match/models/addtaskmodel.dart';
+import 'package:pawfect_match/providers/addtaskproviders.dart';
+import 'package:pawfect_match/providers/categoryprovider.dart';
+import 'package:provider/provider.dart';
 
 class Addtasks extends StatefulWidget {
   const Addtasks({super.key});
@@ -17,13 +21,14 @@ class _AddtasksState extends State<Addtasks> {
 
   String? selectedCategories;
 
-  final List<String> jobs = [
-    'Plumbing',
-    'Painting',
-    'Welding',
-    'Electrician',
-    'Cleaning',
-  ];
+  @override
+  void initState() {
+    super.initState();
+
+    Future.microtask(() {
+      Provider.of<CategoryProvider>(context, listen: false).getCategories();
+    });
+  }
 
   @override
   void dispose() {
@@ -50,20 +55,42 @@ class _AddtasksState extends State<Addtasks> {
     }
   }
 
-  void submitForm() {
+  Future<void> submitForm() async {
     FocusScope.of(context).unfocus();
 
     if (_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Task Added Successfully"),
-          behavior: SnackBarBehavior.floating,
-        ),
+      final task = AddTaskModel(
+        customerId: "1",
+
+        jobCategory: selectedCategories!,
+
+        description: descriptionController.text.trim(),
+
+        location: locationController.text.trim(),
+
+        budget: budgetController.text.trim(),
+
+        deadlineDate: dateController.text.trim(),
       );
 
-      Future.delayed(const Duration(milliseconds: 800), () {
+      final success = await Provider.of<AddTaskProvider>(
+        context,
+        listen: false,
+      ).addTask(task);
+
+      if (!mounted) return;
+
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Task Added Successfully")),
+        );
+
         Navigator.pop(context);
-      });
+      } else {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Task Add Failed")));
+      }
     }
   }
 
@@ -171,35 +198,55 @@ class _AddtasksState extends State<Addtasks> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 10),
 
-                    child: DropdownButtonFormField<String>(
-                      value: selectedCategories,
-
-                      hint: const Text('Job Categories'),
-
-                      validator: (value) {
-                        if (value == null) {
-                          return "Please select category";
+                    child: Consumer<CategoryProvider>(
+                      builder: (context, provider, child) {
+                        if (provider.isLoading) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
                         }
-                        return null;
-                      },
 
-                      decoration: inputDecoration(hint: ""),
+                        return DropdownButtonFormField<String>(
+                          value: selectedCategories,
 
-                      items: jobs.map((item) {
-                        return DropdownMenuItem<String>(
-                          value: item,
-                          child: Text(item),
+                          dropdownColor: Colors.white,
+
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 16,
+                          ),
+
+                          hint: const Text(
+                            "Job Categories",
+                            style: TextStyle(color: Colors.black),
+                          ),
+
+                          decoration: inputDecoration(hint: ""),
+
+                          items: provider.categories.map((item) {
+                            return DropdownMenuItem<String>(
+                              value: item.id,
+
+                              child: Text(
+                                item.categoryName,
+
+                                style: const TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            );
+                          }).toList(),
+
+                          onChanged: (value) {
+                            setState(() {
+                              selectedCategories = value;
+                            });
+                          },
                         );
-                      }).toList(),
-
-                      onChanged: (value) {
-                        setState(() {
-                          selectedCategories = value;
-                        });
                       },
                     ),
                   ),
-
                   const SizedBox(height: 18),
 
                   sectionTitle("Description"),

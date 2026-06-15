@@ -18,7 +18,8 @@ class PendingTaskWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 198,
+      height: 170,
+
       padding: const EdgeInsets.all(14),
 
       decoration: BoxDecoration(
@@ -33,6 +34,9 @@ class PendingTaskWidget extends StatelessWidget {
           Text(
             title,
 
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
 
@@ -41,7 +45,7 @@ class PendingTaskWidget extends StatelessWidget {
           Text(
             description,
 
-            maxLines: 3,
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
 
             style: const TextStyle(
@@ -61,13 +65,14 @@ class PendingTaskWidget extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 14),
+          const SizedBox(height: 10),
 
           GestureDetector(
             onTap: onTap,
 
             child: Container(
               height: 42,
+              width: double.infinity,
 
               decoration: BoxDecoration(
                 gradient: AppColors.buttonGradient,

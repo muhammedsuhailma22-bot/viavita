@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pawfect_match/screens/customerscreens/customer_home.dart';
+import 'package:pawfect_match/screens/customerscreens/main_navigation.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   const ResetPasswordScreen({super.key});
@@ -75,7 +76,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
             pageBuilder: (_, animation, __) {
               return FadeTransition(
                 opacity: animation,
-                child: const CustomerHome(),
+                child: const MainNavigationScreen(),
               );
             },
           ),

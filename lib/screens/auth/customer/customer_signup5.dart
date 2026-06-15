@@ -2,7 +2,10 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:pawfect_match/models/signupmodels.dart';
+import 'package:pawfect_match/providers/signupprovider.dart';
 import 'package:pawfect_match/screens/auth/login_screen3.dart';
+import 'package:provider/provider.dart';
 
 class CustomerSignup extends StatefulWidget {
   const CustomerSignup({super.key});
@@ -57,53 +60,49 @@ class _CustomerSignupState extends State<CustomerSignup> {
   }
 
   void navigateToScreen(Widget screen) {
-    Navigator.push(
-      context,
-      PageRouteBuilder(
-        transitionDuration: const Duration(milliseconds: 300),
-        pageBuilder: (_, animation, __) {
-          return FadeTransition(opacity: animation, child: screen);
-        },
-      ),
-    );
+    Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
   }
 
-  void signupUser() {
+  Future<void> signupUser() async {
     FocusScope.of(context).unfocus();
 
     if (_formKey.currentState!.validate()) {
       if (gender.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Please select gender"),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Please select gender")));
         return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Signup Successful"),
-          behavior: SnackBarBehavior.floating,
-        ),
+      final user = SignupModel(
+        name: nameController.text.trim(),
+        gender: gender,
+        phoneNumber: phoneController.text.trim(),
+        email: emailController.text.trim(),
+        address: addressController.text.trim(),
+        password: passwordController.text.trim(),
       );
 
-      Future.delayed(const Duration(milliseconds: 800), () {
+      final provider = Provider.of<SignupProvider>(context, listen: false);
+
+      final success = await provider.registerUser(user);
+
+      if (!mounted) return; // add this
+
+      if (success) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Signup Successful")));
+
         Navigator.pushReplacement(
           context,
-          PageRouteBuilder(
-            transitionDuration: const Duration(milliseconds: 300),
-            pageBuilder: (_, animation, __) {
-              return FadeTransition(
-                opacity: animation,
-                child: const LoginScreen(),
-              );
-            },
-          ),
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
         );
-      });
+      } else {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Signup Failed")));
+      }
     }
   }
 
@@ -288,9 +287,7 @@ class _CustomerSignupState extends State<CustomerSignup> {
                         const Text("Already have an account ? "),
 
                         InkWell(
-                          onTap: () {
-                            navigateToScreen(const LoginScreen());
-                          },
+                          onTap: () {},
                           child: const Text(
                             "Login",
                             style: TextStyle(fontWeight: FontWeight.bold),

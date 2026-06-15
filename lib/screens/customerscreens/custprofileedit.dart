@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:pawfect_match/providers/custprofileproviders.dart';
+import 'package:provider/provider.dart';
 
 class Custprofileedit extends StatefulWidget {
   const Custprofileedit({super.key});
@@ -25,11 +27,31 @@ class _CustprofileeditState extends State<Custprofileedit> {
   final ImagePicker picker = ImagePicker();
 
   @override
+  void initState() {
+    super.initState();
+
+    final profile = Provider.of<ProfileProvider>(
+      context,
+      listen: false,
+    ).profile;
+
+    if (profile != null) {
+      nameController.text = profile.name;
+      phoneController.text = profile.phone;
+      emailController.text = profile.email;
+      addressController.text = profile.address;
+
+      gender = profile.gender;
+    }
+  }
+
+  @override
   void dispose() {
     nameController.dispose();
     phoneController.dispose();
     emailController.dispose();
     addressController.dispose();
+
     super.dispose();
   }
 
@@ -55,18 +77,20 @@ class _CustprofileeditState extends State<Custprofileedit> {
 
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
+
         borderSide: BorderSide.none,
       ),
 
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
+
         borderSide: BorderSide.none,
       ),
 
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
 
-        borderSide: const BorderSide(color: Color(0xFFEA5A1D), width: 1),
+        borderSide: const BorderSide(color: Color(0xFFEA5A1D)),
       ),
     );
   }
@@ -75,62 +99,78 @@ class _CustprofileeditState extends State<Custprofileedit> {
     FocusScope.of(context).unfocus();
 
     if (formKey.currentState!.validate()) {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
+      final provider = Provider.of<ProfileProvider>(context, listen: false);
 
-        builder: (context) {
-          return Dialog(
-            backgroundColor: Colors.transparent,
+      final result = await provider.updateProfile(
+        id: provider.profile!.id,
 
-            child: Container(
-              height: 220,
+        name: nameController.text,
 
-              decoration: BoxDecoration(
-                color: Colors.white,
+        gender: gender,
 
-                borderRadius: BorderRadius.circular(20),
-              ),
+        phone: phoneController.text,
 
-              child: Column(
-                children: [
-                  Align(
-                    alignment: Alignment.topRight,
+        email: emailController.text,
 
-                    child: IconButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-
-                      icon: const Icon(Icons.close),
-                    ),
-                  ),
-
-                  const Spacer(),
-
-                  Image.asset("assets/images/green.png", height: 60, width: 60),
-
-                  const SizedBox(height: 25),
-
-                  const Text(
-                    "Update successfully",
-
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-                  ),
-
-                  const Spacer(),
-                ],
-              ),
-            ),
-          );
-        },
+        address: addressController.text,
       );
 
-      await Future.delayed(const Duration(seconds: 2));
+      if (result) {
+        await provider.fetchProfile(provider.profile!.id);
 
-      if (mounted) {
-        Navigator.pop(context);
-        Navigator.pop(context);
+        if (!mounted) return;
+
+        showDialog(
+          context: context,
+
+          barrierDismissible: false,
+
+          builder: (context) {
+            return Dialog(
+              backgroundColor: Colors.transparent,
+
+              child: Container(
+                height: 220,
+
+                decoration: BoxDecoration(
+                  color: Colors.white,
+
+                  borderRadius: BorderRadius.circular(20),
+                ),
+
+                child: Column(
+                  children: [
+                    const Spacer(),
+
+                    Image.asset("assets/images/green.png", height: 60),
+
+                    const SizedBox(height: 25),
+
+                    const Text(
+                      "Update successfully",
+
+                      style: TextStyle(
+                        fontSize: 18,
+
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+
+                    const Spacer(),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+
+        await Future.delayed(const Duration(seconds: 2));
+
+        if (mounted) {
+          Navigator.pop(context);
+
+          Navigator.pop(context);
+        }
       }
     }
   }
@@ -138,6 +178,8 @@ class _CustprofileeditState extends State<Custprofileedit> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+
+    final profile = context.watch<ProfileProvider>().profile;
 
     return GestureDetector(
       onTap: () {
@@ -149,9 +191,8 @@ class _CustprofileeditState extends State<Custprofileedit> {
 
         appBar: AppBar(
           elevation: 0,
-          backgroundColor: Colors.white,
 
-          centerTitle: false,
+          backgroundColor: Colors.white,
 
           leading: IconButton(
             onPressed: () {
@@ -162,16 +203,15 @@ class _CustprofileeditState extends State<Custprofileedit> {
           ),
 
           title: const Text(
-            'Edit Profile',
+            "Edit Profile",
 
             style: TextStyle(
+              color: Colors.black,
               fontSize: 20,
               fontWeight: FontWeight.w500,
-              color: Colors.black,
             ),
           ),
         ),
-
         body: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -195,12 +235,15 @@ class _CustprofileeditState extends State<Custprofileedit> {
 
                           backgroundImage: selectedImage != null
                               ? FileImage(selectedImage!)
+                              : profile != null && profile.avatar.isNotEmpty
+                              ? NetworkImage(profile.avatar)
                               : const AssetImage('assets/images/p.jpg')
                                     as ImageProvider,
                         ),
 
                         Positioned(
                           bottom: 6,
+
                           left: 8,
 
                           child: InkWell(
@@ -208,10 +251,7 @@ class _CustprofileeditState extends State<Custprofileedit> {
 
                             onTap: pickImage,
 
-                            child: Image.asset(
-                              'assets/images/stck.png',
-                              scale: 1,
-                            ),
+                            child: Image.asset('assets/images/stck.png'),
                           ),
                         ),
                       ],
@@ -220,155 +260,103 @@ class _CustprofileeditState extends State<Custprofileedit> {
 
                   SizedBox(height: size.height * 0.05),
 
-                  const Text(
-                    "Name",
-
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                  ),
+                  const Text("Name"),
 
                   const SizedBox(height: 5),
 
-                  SizedBox(
-                    height: 60,
+                  TextFormField(
+                    controller: nameController,
 
-                    child: TextFormField(
-                      controller: nameController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "Enter name";
+                      }
 
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "Please enter your name";
-                        }
+                      return null;
+                    },
 
-                        return null;
-                      },
-
-                      decoration: inputDecoration("Full Name"),
-                    ),
+                    decoration: inputDecoration("Full Name"),
                   ),
 
-                  SizedBox(height: size.height * 0.02),
+                  SizedBox(height: size.height * 0.03),
 
-                  const Text(
-                    "Gender",
-
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                  ),
-
-                  const SizedBox(height: 10),
+                  const Text("Gender"),
 
                   Row(
                     children: [
                       genderTile("Male"),
+
                       genderTile("Female"),
+
                       genderTile("Other"),
                     ],
                   ),
 
-                  SizedBox(height: size.height * 0.05),
+                  SizedBox(height: size.height * 0.03),
 
-                  const Text(
-                    "Phone Number",
+                  const Text("Phone Number"),
 
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                  TextFormField(
+                    controller: phoneController,
+
+                    keyboardType: TextInputType.phone,
+
+                    validator: (value) {
+                      if (value == null || value.length != 10) {
+                        return "Enter valid phone";
+                      }
+
+                      return null;
+                    },
+
+                    decoration: inputDecoration("Phone Number"),
                   ),
 
-                  const SizedBox(height: 5),
+                  SizedBox(height: size.height * 0.03),
 
-                  SizedBox(
-                    height: 60,
+                  const Text("Email ID"),
 
-                    child: TextFormField(
-                      controller: phoneController,
+                  TextFormField(
+                    controller: emailController,
 
-                      keyboardType: TextInputType.phone,
+                    keyboardType: TextInputType.emailAddress,
 
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "Please enter phone number";
-                        }
+                    validator: (value) {
+                      if (value == null || !value.contains("@")) {
+                        return "Enter valid email";
+                      }
 
-                        if (value.length != 10) {
-                          return "Enter valid phone number";
-                        }
+                      return null;
+                    },
 
-                        return null;
-                      },
-
-                      decoration: inputDecoration("Phone Number"),
-                    ),
+                    decoration: inputDecoration("Email ID"),
                   ),
 
-                  SizedBox(height: size.height * 0.05),
+                  SizedBox(height: size.height * 0.03),
 
-                  const Text(
-                    "Email ID",
+                  const Text("Address"),
 
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                  ),
+                  TextFormField(
+                    controller: addressController,
 
-                  const SizedBox(height: 5),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "Enter address";
+                      }
 
-                  SizedBox(
-                    height: 60,
+                      return null;
+                    },
 
-                    child: TextFormField(
-                      controller: emailController,
-
-                      keyboardType: TextInputType.emailAddress,
-
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "Please enter email";
-                        }
-
-                        if (!value.contains("@")) {
-                          return "Enter valid email";
-                        }
-
-                        return null;
-                      },
-
-                      decoration: inputDecoration("Email ID"),
-                    ),
-                  ),
-
-                  SizedBox(height: size.height * 0.05),
-
-                  const Text(
-                    "Address",
-
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                  ),
-
-                  const SizedBox(height: 5),
-
-                  SizedBox(
-                    height: 60,
-
-                    child: TextFormField(
-                      controller: addressController,
-
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "Please enter address";
-                        }
-
-                        return null;
-                      },
-
-                      decoration: inputDecoration("Address"),
-                    ),
+                    decoration: inputDecoration("Address"),
                   ),
 
                   SizedBox(height: size.height * 0.05),
 
                   InkWell(
-                    borderRadius: BorderRadius.circular(10),
-
                     onTap: updateProfile,
 
                     child: Container(
-                      height: size.height * 0.070,
+                      height: size.height * 0.07,
 
                       width: double.infinity,
 
@@ -388,6 +376,7 @@ class _CustprofileeditState extends State<Custprofileedit> {
                             color: Colors.white,
 
                             fontSize: 16,
+
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -410,6 +399,7 @@ class _CustprofileeditState extends State<Custprofileedit> {
       children: [
         Radio<String>(
           value: value,
+
           groupValue: gender,
 
           activeColor: const Color(0xFFEA5A1D),
@@ -426,6 +416,7 @@ class _CustprofileeditState extends State<Custprofileedit> {
 
           style: const TextStyle(
             fontSize: 16,
+
             color: Color.fromRGBO(105, 113, 129, 1),
           ),
         ),

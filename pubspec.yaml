@@ -13,6 +13,7 @@ dependencies:
    sdk: flutter
   provider: ^6.1.2
   firebase_core: ^4.9.0
+  shared_preferences: ^2.5.3
   # firebase_auth: ^latest
   # cloud_firestore: ^latest
   # firebase_storage: ^latest
@@ -25,6 +26,7 @@ dependencies:
 
   # Image picker (gallery & camera)
   image_picker: ^1.0.7
+  shimmer: ^3.0.0
 
 dev_dependencies:
   flutter_test:

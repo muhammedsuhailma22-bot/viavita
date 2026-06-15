@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:pawfect_match/models/edittasksmodel.dart';
+import 'package:pawfect_match/providers/categoryprovider.dart';
+import 'package:pawfect_match/providers/edittasksproviders.dart';
+import 'package:provider/provider.dart';
 
 class Addtaskcus extends StatefulWidget {
-  const Addtaskcus({super.key});
+  final String taskId;
 
+  const Addtaskcus({super.key, required this.taskId});
   @override
   State<Addtaskcus> createState() => _AddtaskcusState();
 }
@@ -17,13 +22,15 @@ class _AddtaskcusState extends State<Addtaskcus> {
 
   String? selectedCategory;
 
-  final List<String> job = [
-    'Plumbing',
-    'Painting',
-    'Welding',
-    'Electrician',
-    'Cleaning',
-  ];
+  @override
+  @override
+  void initState() {
+    super.initState();
+
+    Future.microtask(() {
+      Provider.of<CategoryProvider>(context, listen: false).getCategories();
+    });
+  }
 
   @override
   void dispose() {
@@ -50,20 +57,42 @@ class _AddtaskcusState extends State<Addtaskcus> {
     }
   }
 
-  void submitForm() {
+  Future<void> submitForm() async {
     FocusScope.of(context).unfocus();
 
     if (_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Task Updated Successfully"),
-          behavior: SnackBarBehavior.floating,
-        ),
+      final task = EditTaskModel(
+        taskId: widget.taskId,
+
+        jobCategory: selectedCategory!,
+
+        description: descriptionController.text.trim(),
+
+        location: locationController.text.trim(),
+
+        budget: budgetController.text.trim(),
+
+        deadlineDate: dateController.text.trim(),
       );
 
-      Future.delayed(const Duration(milliseconds: 800), () {
+      final success = await Provider.of<EditTaskProvider>(
+        context,
+        listen: false,
+      ).editTask(task);
+
+      if (!mounted) return;
+
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Task Updated Successfully")),
+        );
+
         Navigator.pop(context);
-      });
+      } else {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Update Failed")));
+      }
     }
   }
 
@@ -183,10 +212,12 @@ class _AddtaskcusState extends State<Addtaskcus> {
                         return null;
                       },
 
-                      items: job.map((item) {
+                      items: context.watch<CategoryProvider>().categories.map((
+                        item,
+                      ) {
                         return DropdownMenuItem<String>(
-                          value: item,
-                          child: Text(item),
+                          value: item.id,
+                          child: Text(item.categoryName),
                         );
                       }).toList(),
 
